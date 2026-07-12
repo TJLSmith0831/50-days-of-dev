@@ -1,0 +1,14 @@
+# Day NN — <title> — AGENTS.md
+<one-line concrete outcome, e.g. "Answers PDF questions in 1.8s using LangChain + local Llama 3.1">
+
+## Stack
+<language> · <framework(s)> · <model: local via Ollama (<model name>) | hosted (<provider>, because <reason>)>
+
+## Commands (verified <date>)
+<e.g. `uv run main.py` — or — `pnpm install && pnpm start`>
+
+## Concept
+<1-2 sentences: what this day is teaching, why it's the point of this exercise>
+
+## Gotchas
+<day-specific pitfalls only — delete this section if none. Don't repeat root AGENTS.md.>

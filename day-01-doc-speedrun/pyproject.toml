@@ -1,0 +1,18 @@
+[project]
+name = "day-01-doc-speedrun"
+version = "0.0.0"
+requires-python = ">=3.13"
+dependencies = [
+  "langchain",
+  "langchain-community",
+  "langchain-ollama",
+  "pypdf",
+  "docx2txt",
+  "faiss-cpu",
+  "python-dotenv",
+  "langchain-text-splitters",
+  "rich",
+]
+
+[tool.uv]
+package = false

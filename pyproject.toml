@@ -1,0 +1,10 @@
+[project]
+name = "fifty-days-of-dev"
+version = "0.0.0"
+requires-python = ">=3.13"
+
+[tool.uv.workspace]
+members = ["day-*"]
+
+[tool.uv]
+package = false
