@@ -14,6 +14,7 @@ See [AGENTS.md](AGENTS.md) for repo conventions/commands. Each day's own README 
 *   Week 1 fixed (frameworks + harness/loop); Week 2 reshaped to fold in agent-permission/governance topics early (moved up from the original plan's week 6); Weeks 3-6 keep the original topic coverage (RAG, evals, optimization, production); Week 7 is an open buffer/polish week; Day 50 is the finale, 8/31 is recap-only.
 *   Weekly Recap days upgraded to Capstone builds — each combines that week's techniques into one bigger runnable artifact instead of a written summary.
 *   Days 37-41 swapped from already-known ops skills (streaming, rate limiting, Docker, secrets/config, health checks) to new AI-engineering territory: semantic caching, agent memory, structured outputs, prompt-injection defense, model routing.
+*   Day 5 swapped from Raw agent loop (Bare-Metal Agent — already covered elsewhere) to Self-improving agents (Self-Refining Agent, reflect-retry loop); Day 7 Decathlon accordingly compares the 5 comparable framework implementations rather than 6.
 *   No CI/test suite — each day's entrypoint run is the check.
 
 ## Tracker
@@ -24,9 +25,9 @@ See [AGENTS.md](AGENTS.md) for repo conventions/commands. Each day's own README 
 | 2 | 7/13 Mon | LangGraph | Resumable Research Agent — 3-node graph, kill mid-run & resume from checkpoint | Py | local | done |
 | 3 | 7/14 Tue | Claude Agent SDK / subagents | Delegate Bot — parent spawns 2 subagents in parallel, measure wall-clock vs sequential | Py/TS | hosted (Claude) | planned |
 | 4 | 7/15 Wed | CrewAI | Content Crew — researcher+writer crew produce one blog draft, timed | Py | local | planned |
-| 5 | 7/16 Thu | Raw agent loop | Bare-Metal Agent — hand-rolled perceive-reason-act loop, compare LOC/latency vs Day 1 | Py | local | planned |
+| 5 | 7/16 Thu | Self-improving agents | Self-Refining Agent — agent critiques and revises its own output in a reflect-retry loop, measure quality lift across N iterations | Py | local | planned |
 | 6 | 7/17 Fri | Harness engineering | Model-Swap Harness — same capability on local Llama vs Claude, compare output/latency/cost | Py | mixed | planned |
-| 7 | 7/18 Sat | Capstone | Framework Decathlon — same task run through all 6 Day 1-6 implementations, one script prints the comparison table | Py | mixed | planned |
+| 7 | 7/18 Sat | Capstone | Framework Decathlon — same task run through the 5 comparable Day 1-6 framework implementations (LangChain, LangGraph, Agent SDK, CrewAI, harness), one script prints the comparison table | Py | mixed | planned |
 | 8 | 7/19 Sun | MCP basics | Local Tool MCP — minimal MCP server wrapping a local tool, prove round-trip | TS | local | planned |
 | 9 | 7/20 Mon | MCP caching | Cached Weather MCP — ttlMs caching, cache-hit vs cache-miss latency | TS | hosted API (weather) | planned |
 | 10 | 7/21 Tue | Scoped auth | Locked-Down MCP — per-tool auth scopes, show allowed vs rejected call | TS | local | planned |
