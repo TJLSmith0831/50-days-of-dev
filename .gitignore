@@ -8,5 +8,6 @@ dist/
 .impeccable/
 .faiss_index/
 .faiss_index_cache_meta.pkl
+*.db
 uv.lock
 .vscode/

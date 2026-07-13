@@ -21,7 +21,7 @@ See [AGENTS.md](AGENTS.md) for repo conventions/commands. Each day's own README 
 | Day | Date | Topic | Project | Lang | Model | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | 7/12 Sun | LangChain | Doc Speedrun — Retrieval QA over a PDF, timed | Py | local | done |
-| 2 | 7/13 Mon | LangGraph | Resumable Research Agent — 3-node graph, kill mid-run & resume from checkpoint | Py | local | planned |
+| 2 | 7/13 Mon | LangGraph | Resumable Research Agent — 3-node graph, kill mid-run & resume from checkpoint | Py | local | done |
 | 3 | 7/14 Tue | Claude Agent SDK / subagents | Delegate Bot — parent spawns 2 subagents in parallel, measure wall-clock vs sequential | Py/TS | hosted (Claude) | planned |
 | 4 | 7/15 Wed | CrewAI | Content Crew — researcher+writer crew produce one blog draft, timed | Py | local | planned |
 | 5 | 7/16 Thu | Raw agent loop | Bare-Metal Agent — hand-rolled perceive-reason-act loop, compare LOC/latency vs Day 1 | Py | local | planned |

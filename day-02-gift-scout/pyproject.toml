@@ -1,0 +1,15 @@
+[project]
+name = "day-02-gift-scout"
+version = "0.0.0"
+requires-python = ">=3.13"
+dependencies = [
+  "langgraph",
+  "langgraph-checkpoint-sqlite",
+  "langchain-ollama",
+  "ddgs",
+  "rich",
+  "python-dotenv",
+]
+
+[tool.uv]
+package = false
