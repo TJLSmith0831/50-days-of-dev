@@ -11,3 +11,5 @@ dist/
 *.db
 uv.lock
 .vscode/
+.windsurf/
+.claude/

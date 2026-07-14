@@ -1,0 +1,17 @@
+[project]
+name = "day-03-repo-doctor"
+version = "0.0.0"
+requires-python = ">=3.13"
+dependencies = [
+  "claude-agent-sdk",
+  "rich",
+  "python-dotenv",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+]
+
+[tool.uv]
+package = false
