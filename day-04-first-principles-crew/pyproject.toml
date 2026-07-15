@@ -1,0 +1,16 @@
+[project]
+name = "day-04-first-principles-crew"
+version = "0.1.0"
+description = "First-Principles Crew — break messy problems into fundamental truths using CrewAI"
+requires-python = ">=3.10"
+dependencies = [
+    "crewai",
+    "crewai[tools]",
+    "litellm",
+    "rich",
+    "python-dotenv",
+    "pydantic",
+]
+
+[tool.uv]
+package = false

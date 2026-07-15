@@ -1,0 +1,29 @@
+challenge_task:
+  description: >
+    Problem: {problem}
+
+    List every assumption baked into this problem statement. For each, mark
+    whether it's questionable and explain why.
+  expected_output: >
+    A structured set of assumptions with questionable flags and reasoning.
+  agent: skeptic
+
+distill_task:
+  description: >
+    Using only the assumptions that survive scrutiny, distill the irreducible
+    fundamental truths relevant to: {problem}
+  expected_output: >
+    A structured set of fundamental truths, each with its basis.
+  agent: physicist
+  context:
+    - challenge_task
+
+build_task:
+  description: >
+    Using only the fundamentals, reconstruct one concrete recommendation for: {problem}
+  expected_output: >
+    A single recommendation with the fundamentals it rests on.
+  agent: builder
+  context:
+    - challenge_task
+    - distill_task
