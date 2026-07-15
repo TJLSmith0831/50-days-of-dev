@@ -39,9 +39,13 @@ def _format_pydantic(obj) -> str | None:
     return None
 
 
+AGENT_COLORS = {"Skeptic": "red", "Physicist": "yellow", "Builder": "green"}
+
+
 def print_task_output(output: TaskOutput) -> None:
     body = _format_pydantic(output.pydantic) if output.pydantic is not None else output.raw
-    console.print(Panel(body, title=f"[bold]{output.agent}[/bold]"))
+    color = next((c for name, c in AGENT_COLORS.items() if name in output.agent), "white")
+    console.print(Panel(body, title=f"[bold]{output.agent}[/bold]", border_style=color))
 
 
 @CrewBase

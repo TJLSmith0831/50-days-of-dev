@@ -4,9 +4,11 @@
 Crew wiring (agents/tasks/config) lives in crew.py + config/*.yaml.
 """
 
+import datetime
 import os
 import sys
 import time
+from pathlib import Path
 
 os.environ.setdefault("CREWAI_TELEMETRY_OPT_OUT", "true")
 
@@ -17,15 +19,24 @@ from rich.prompt import Prompt
 from crewai import Crew, Process, Task
 
 from crew import FirstPrinciplesCrew, print_task_output
-from models import Assumption, AssumptionSet, Fundamental, FundamentalSet
+from models import (
+    Assumption,
+    AssumptionSet,
+    Fundamental,
+    FundamentalSet,
+    Recommendation,
+)
 
 load_dotenv()
 console = Console()
 
 DEFAULT_PROBLEM = "Should we rebuild our legacy monolith as microservices?"
 HELP = (
-    "Type a follow-up to refine the recommendation, 'drill <n>' to challenge "
-    "fundamental #n, 'new <problem>' to start over, or 'exit'."
+    "Type a follow-up to refine the recommendation.\n"
+    "  drill <n or text>    challenge a fundamental, by number or a snippet of its wording\n"
+    "  new <problem>        start over on a different problem\n"
+    "  help                 show this again\n"
+    "  exit / quit / Ctrl-D leave"
 )
 
 fp_crew = FirstPrinciplesCrew()
@@ -49,9 +60,37 @@ def ollama_down_message(e: Exception) -> str | None:
     return None
 
 
+DECISIONS_FILE = Path(__file__).with_name("decisions.md")
+
+
+def format_decision(state: dict, when: str) -> str:
+    """Markdown block for one session: timestamp, problem, fundamentals, recommendation."""
+    fundamentals = "\n".join(
+        f"- {f.truth} ({f.basis})" for f in state["fundamentals"].fundamentals
+    )
+    rec = state["recommendation"]
+    return (
+        f"## {when} — {state['problem'].splitlines()[0]}\n\n"
+        f"**Problem:** {state['problem']}\n\n"
+        f"**Fundamentals:**\n{fundamentals}\n\n"
+        f"**Recommendation:** {rec.recommendation}\n\n"
+        "---\n\n"
+    )
+
+
+def append_decision(state: dict) -> None:
+    """Append this session to the local decisions.md. Never crashes the REPL."""
+    when = datetime.datetime.now().isoformat(timespec="seconds")
+    try:
+        with open(DECISIONS_FILE, "a") as f:
+            f.write(format_decision(state, when))
+    except OSError as e:
+        console.print(f"[yellow]Couldn't log to decisions.md ({e}).[/yellow]")
+
+
 def run(problem: str):
     """Runs the full crew on `problem`. Returns {problem, assumptions, fundamentals, recommendation} or None."""
-    console.print(Panel(problem, title="Problem"))
+    console.print(Panel(problem, title="Problem", border_style="cyan"))
 
     start = time.perf_counter()
     try:
@@ -77,12 +116,33 @@ def run(problem: str):
 
     console.print(f"[bold]{metric_line(assumptions, fundamentals, elapsed)}[/bold]")
 
-    return {
+    state = {
         "problem": problem,
         "assumptions": assumptions,
         "fundamentals": fundamentals,
         "recommendation": recommendation,
     }
+    append_decision(state)
+    return state
+
+
+def resolve_fundamental(
+    fundamentals: FundamentalSet, arg: str
+) -> tuple[int | None, list[int]]:
+    """Resolve 'drill' arg to a 1-based index, by number or substring of the fundamental's wording.
+
+    Returns (index, candidates): index is set only on an unambiguous match; otherwise
+    candidates lists every 1-based match (empty if none) so the caller can report why.
+    """
+    if arg.isdigit():
+        idx = int(arg)
+        return (idx, []) if 1 <= idx <= len(fundamentals.fundamentals) else (None, [])
+    matches = [
+        i
+        for i, f in enumerate(fundamentals.fundamentals, 1)
+        if arg.lower() in f.truth.lower()
+    ]
+    return (matches[0], []) if len(matches) == 1 else (None, matches)
 
 
 def drill_fundamental(
@@ -119,18 +179,33 @@ def drill_fundamental(
 
 
 def repl(default_problem: str):
-    console.print(Panel(HELP, title="First-Principles Crew — REPL"))
+    console.print(
+        Panel(HELP, title="First-Principles Crew — REPL", border_style="cyan")
+    )
 
     state = None
     while state is None:
-        problem = Prompt.ask("[cyan]Problem[/cyan]", default=default_problem)
+        try:
+            problem = Prompt.ask("[cyan]Problem[/cyan]", default=default_problem)
+        except (EOFError, KeyboardInterrupt):
+            console.print("\n[cyan]Goodbye.[/cyan]")
+            return
         state = run(problem)
 
     while True:
-        cmd = Prompt.ask("[cyan]>[/cyan]").strip()
+        try:
+            cmd = Prompt.ask("[cyan]>[/cyan]").strip()
+        except (EOFError, KeyboardInterrupt):
+            console.print("\n[cyan]Goodbye.[/cyan]")
+            return
 
         if cmd in ("exit", "quit"):
+            console.print("[cyan]Goodbye.[/cyan]")
             return
+
+        if cmd in ("help", "?"):
+            console.print(Panel(HELP, title="Help", border_style="cyan"))
+            continue
 
         if cmd.startswith("new "):
             new_state = run(cmd[len("new ") :].strip())
@@ -140,14 +215,23 @@ def repl(default_problem: str):
 
         if cmd.startswith("drill "):
             arg = cmd[len("drill ") :].strip()
-            if not arg.isdigit():
-                console.print("[red]Usage: drill <fundamental number>[/red]")
+            if not arg:
+                console.print("[red]Usage: drill <number or text>[/red]")
                 continue
-            revised = drill_fundamental(
-                state["fundamentals"], int(arg), state["problem"]
-            )
+            idx, candidates = resolve_fundamental(state["fundamentals"], arg)
+            if idx is None:
+                if candidates:
+                    listing = "\n".join(
+                        f"  {i}. {state['fundamentals'].fundamentals[i - 1].truth}"
+                        for i in candidates
+                    )
+                    console.print(f"[red]Ambiguous match for '{arg}':[/red]\n{listing}")
+                else:
+                    console.print(f"[red]No fundamental matches '{arg}'.[/red]")
+                continue
+            revised = drill_fundamental(state["fundamentals"], idx, state["problem"])
             if revised is None:
-                console.print(f"[red]No fundamental #{arg}, or the drill failed.[/red]")
+                console.print(f"[red]Drill on fundamental #{idx} failed.[/red]")
             continue
 
         if not cmd:
@@ -184,6 +268,18 @@ def demo():
         line
         == "2 assumptions challenged → 2 fundamentals → 1 recommendation in 1.0s (local llama3.2)."
     )
+
+    state = {
+        "problem": "Ship it?",
+        "assumptions": assumptions,
+        "fundamentals": fundamentals,
+        "recommendation": Recommendation(recommendation="Yes", rests_on=["t1"]),
+    }
+    block = format_decision(state, "2026-07-15T12:00:00")
+    assert block.startswith("## 2026-07-15T12:00:00 — Ship it?")
+    assert "- t1 (b1)" in block and "- t2 (b2)" in block
+    assert "**Recommendation:** Yes" in block
+
     print("demo() OK:", line)
 
 

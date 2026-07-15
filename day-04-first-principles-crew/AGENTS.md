@@ -11,6 +11,9 @@ Python · CrewAI (crewai, Process.sequential) · LiteLLM → Ollama (ollama/llam
 ## Concept
 CrewAI's declarative, role-based orchestration: specialized agents whose outputs chain forward via context=, run as a sequential Crew. Contrast with Day 2 (explicit LangGraph state graph) and Day 3 (SDK subagent spawn) — same "multiple cooperating agents" goal, a third distinct abstraction. The first-principles method is the payload that makes the role separation meaningful.
 
+## Decision log
+Every completed `run()` appends a Markdown block (timestamp · problem · fundamentals · recommendation) to a local `decisions.md`. Logging lives in `run()` — the single point that produces a full recommendation — so initial/`new`/refinement all log once; `drill` (revises one fundamental, no new recommendation) deliberately doesn't. `decisions.md` is `.gitignore`d: it holds real, sensitive calls (fire/kill/offer), so it stays on-disk and never commits.
+
 ## Gotchas
 - LiteLLM wiring: CrewAI reaches Ollama through LiteLLM — use LLM(model="ollama/llama3.2", base_url="http://localhost:11434"), not the langchain-ollama object Days 1–2 use.
 - Structured output on small local models is flaky: llama3.2 may not reliably fill a schema. Mitigate with tiny/flat models, low temperature, terse prompts, and graceful fallback if parsing fails.

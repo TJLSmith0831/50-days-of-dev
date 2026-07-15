@@ -23,8 +23,8 @@ See [AGENTS.md](AGENTS.md) for repo conventions/commands. Each day's own README 
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | 7/12 Sun | LangChain | Doc Speedrun — Retrieval QA over a PDF, timed | Py | local | done |
 | 2 | 7/13 Mon | LangGraph | Resumable Research Agent — 3-node graph, kill mid-run & resume from checkpoint | Py | local | done |
-| 3 | 7/14 Tue | Claude Agent SDK / subagents | Delegate Bot — parent spawns 2 subagents in parallel, measure wall-clock vs sequential | Py/TS | hosted (Claude) | planned |
-| 4 | 7/15 Wed | CrewAI | Content Crew — researcher+writer crew produce one blog draft, timed | Py | local | planned |
+| 3 | 7/14 Tue | Claude Agent SDK / guardrails | Repo Doctor — diagnose and repair wiring-only failures in Python repos with tool/path/command guardrails | Py | hosted (Claude) | done |
+| 4 | 7/15 Wed | CrewAI | First-Principles Crew — break messy problems into fundamental truths after challenging assumptions | Py | local | done |
 | 5 | 7/16 Thu | Self-improving agents | Self-Refining Agent — agent critiques and revises its own output in a reflect-retry loop, measure quality lift across N iterations | Py | local | planned |
 | 6 | 7/17 Fri | Harness engineering | Model-Swap Harness — same capability on local Llama vs Claude, compare output/latency/cost | Py | mixed | planned |
 | 7 | 7/18 Sat | Ship-it | Ship Day — take Week 1's strongest build to portfolio-grade (see Ship DoD); target picked at week's end | — | — | planned |

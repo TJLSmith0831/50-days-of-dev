@@ -45,6 +45,10 @@ Always waits for input before running anything — hit Enter to accept the shown
 
 Model output on llama3.2 is flaky (structured-output parsing occasionally fails mid-run); failures are caught and print a retry prompt instead of crashing the session — see the AGENTS.md gotchas.
 
+## Decision log
+
+Every completed run appends a timestamped block — problem, fundamentals, recommendation — to a local `decisions.md`. It runs fully offline and is `.gitignore`d, so it's the one place you'd actually paste a real "should we fire this person / kill this feature / take this offer" question: the record stays on your disk, never a server, never the repo.
+
 ## Metric
 
 Parsed from the objects, not the prose:
