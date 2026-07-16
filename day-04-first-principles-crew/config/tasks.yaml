@@ -5,7 +5,8 @@ challenge_task:
     List every assumption baked into this problem statement. For each, mark
     whether it's questionable and explain why.
   expected_output: >
-    A structured set of assumptions with questionable flags and reasoning.
+    At most 4 assumptions. Each statement and its why must be a single short
+    sentence — punchy, no hedging.
   agent: skeptic
 
 distill_task:
@@ -13,7 +14,8 @@ distill_task:
     Using only the assumptions that survive scrutiny, distill the irreducible
     fundamental truths relevant to: {problem}
   expected_output: >
-    A structured set of fundamental truths, each with its basis.
+    3 to 4 fundamental truths. Each truth and its basis must be a single short
+    sentence.
   agent: physicist
   context:
     - challenge_task
@@ -22,7 +24,8 @@ build_task:
   description: >
     Using only the fundamentals, reconstruct one concrete recommendation for: {problem}
   expected_output: >
-    A single recommendation with the fundamentals it rests on.
+    One recommendation of at most two sentences, resting on at most 3
+    fundamentals (quoted verbatim).
   agent: builder
   context:
     - challenge_task
