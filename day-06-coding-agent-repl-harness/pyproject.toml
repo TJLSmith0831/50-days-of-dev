@@ -1,0 +1,23 @@
+[project]
+name = "coding-agent-repl-harness"
+version = "0.1.0"
+description = "Spec Driven Design writer harness with grilling ability and Claude Code handoff"
+requires-python = ">=3.10"
+dependencies = [
+    "rich>=13.0.0",
+    "ollama>=0.1.0",
+    "ddgs>=4.0.0",
+    "langgraph>=0.0.20",
+    "langgraph-checkpoint-sqlite>=2.0.0",
+    "langchain-ollama>=0.1.0",
+    "langchain-core>=0.1.0",
+    "tiktoken>=0.5.0",
+    "python-dotenv>=1.0.0",
+]
+
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
