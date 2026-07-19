@@ -1,0 +1,32 @@
+{
+  "name": "day-08-docs-mcp",
+  "version": "1.0.0",
+  "description": "A minimal MCP server that exposes local project documentation (Markdown files) as a searchable resource/tool, with a round-trip client call proving it works.",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "demo": "pnpm build && tsx src/client.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": [],
+  "author": "tjlsmith0831",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0-beta.4",
+    "@modelcontextprotocol/server": "2.0.0-beta.4",
+    "octokit": "^5.0.5",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/ui": "^2.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  }
+}

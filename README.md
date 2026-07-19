@@ -28,7 +28,7 @@ See [AGENTS.md](AGENTS.md) for repo conventions/commands. Each day's own README 
 | 5 | 7/16 Thu | Self-improving agents | Self-Improving Agent — writes code, gets graded by real tests it never sees, and distills each struggle into persistent lessons injected into future prompts; a lesson is only saved if it provably reproduces the win from scratch. Measured: fresh runs solve the money task in 3 attempts (6/6 runs); with the verified lesson loaded, **first try, 4/4 runs**. Also measured: unvalidated lessons bank bad advice, distilling without the winning code invents remedies, and a task-specific lesson injected as a command broke an unrelated task 0/7 | Py | local | done |
 | 6 | 7/17 Fri | Harness engineering | Model-Swap Harness — same capability on local Llama vs Claude, compare output/latency/cost | Py | mixed | done |
 | 7 | 7/18 Sat | Ship-it | Ship Day — take Week 1's strongest build to portfolio-grade (see Ship DoD); target picked at week's end | — | — | done |
-| 8 | 7/19 Sun | MCP basics | Local Tool MCP — minimal MCP server wrapping a local tool, prove round-trip | TS | local | planned |
+| 8 | 7/19 Sun | MCP basics | Docs MCP — minimal MCP server that exposes local project docs, proves a round-trip | TS | local | done |
 | 9 | 7/20 Mon | MCP caching | Cached Weather MCP — ttlMs caching, cache-hit vs cache-miss latency | TS | hosted API (weather) | planned |
 | 10 | 7/21 Tue | Scoped auth | Locked-Down MCP — per-tool auth scopes, show allowed vs rejected call | TS | local | planned |
 | 11 | 7/22 Wed | Audit logging | Audited Agent — every tool call logged to an audit trail, print it after a run | Py | local | planned |
