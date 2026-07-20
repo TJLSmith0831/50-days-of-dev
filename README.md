@@ -29,7 +29,7 @@ See [AGENTS.md](AGENTS.md) for repo conventions/commands. Each day's own README 
 | 6 | 7/17 Fri | Harness engineering | Model-Swap Harness — same capability on local Llama vs Claude, compare output/latency/cost | Py | mixed | done |
 | 7 | 7/18 Sat | Ship-it | Ship Day — take Week 1's strongest build to portfolio-grade (see Ship DoD); target picked at week's end | — | — | done |
 | 8 | 7/19 Sun | MCP basics | Docs MCP — minimal MCP server that exposes local project docs, proves a round-trip | TS | local | done |
-| 9 | 7/20 Mon | MCP caching | Cached Weather MCP — ttlMs caching, cache-hit vs cache-miss latency | TS | hosted API (weather) | planned |
+| 9 | 7/20 Mon | MCP caching | Cached Weather MCP — ttlMs caching, cache-hit vs cache-miss latency | TS | hosted API (weather) | in progress |
 | 10 | 7/21 Tue | Scoped auth | Locked-Down MCP — per-tool auth scopes, show allowed vs rejected call | TS | local | planned |
 | 11 | 7/22 Wed | Audit logging | Audited Agent — every tool call logged to an audit trail, print it after a run | Py | local | planned |
 | 12 | 7/23 Thu | Guardrails | Guarded Agent — regex + LLM guardrail blocks a bad input, show blocked vs allowed | Py | local | planned |
