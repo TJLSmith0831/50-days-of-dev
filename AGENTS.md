@@ -6,7 +6,7 @@ Personal challenge: one AI-engineering mini-project per day (7/12–8/31), scope
 - New Python day: `day-NN-slug/pyproject.toml` MUST set `[tool.uv] package = false` — without it `uv run` tries to build a wheel and fails
 - TS day: `cd day-NN-slug && pnpm install && pnpm start`
 - New TS day: `package.json` needs `"private": true` and a `start` script
-- Root `uv sync` / root `pnpm install` resolve all members of their respective workspace at once
+- Root `uv sync --all-packages` / root `pnpm install` resolve all members of their respective workspace at once — bare `uv sync` (no flag) only installs the virtual root project's own (empty) deps, not workspace members', which is why an IDE interpreter pointed at the root `.venv` can show missing imports for a day's deps until `--all-packages` is run
 
 ## Map
 - `day-NN-slug/` — one folder per challenge day, self-contained, own deps, own AGENTS.md (see template)
@@ -14,6 +14,7 @@ Personal challenge: one AI-engineering mini-project per day (7/12–8/31), scope
 - root `pnpm-workspace.yaml` — pnpm workspace; only registers members that have their own `package.json` (no root `package.json` needed)
 - `_templates/day-AGENTS.md.template` — starting point for each new day's own AGENTS.md
 - `README.md` — progress tracker (day, topic, outcome tagline, status, links)
+- `critiques/` — session notes; conducting agents should review relevant notes before future work
 
 ## Gotchas
 - Local models default via Ollama; reach for a hosted API (Claude/GPT) only when a day's concept specifically requires it (multi-agent handoff, LLM-as-judge, deployment) — note the choice in that day's own AGENTS.md/README
@@ -37,3 +38,7 @@ Personal challenge: one AI-engineering mini-project per day (7/12–8/31), scope
 
 ## Pointers
 - Per-day conventions/gotchas: `day-NN-slug/AGENTS.md`
+
+## Session critique notes
+
+The conducting agent should look at session notes in `critiques/` before future work.
