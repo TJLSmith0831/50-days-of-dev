@@ -1,0 +1,7 @@
+{
+  "name": "audit-plugin",
+  "version": "0.1.0",
+  "description": "Logs every tool call to a per-session JSONL audit trail (timestamp, inputs/outputs, byte sizes, duration, status) and prints a report at session end.",
+  "author": { "name": "TJ Smith" },
+  "skills": "./skills/"
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "audit-plugin",
+  "description": "Per-session tool-call audit trail for Claude Code.",
+  "owner": { "name": "TJ Smith" },
+  "plugins": [
+    {
+      "name": "audit-plugin",
+      "description": "Logs every tool call to a per-session JSONL audit trail and prints a report at session end.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
