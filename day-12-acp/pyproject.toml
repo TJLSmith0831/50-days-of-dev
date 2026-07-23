@@ -1,0 +1,18 @@
+[project]
+name = "day-12-acp"
+version = "0.0.0"
+requires-python = ">=3.13"
+dependencies = [
+  "beeai-framework[acp,duckduckgo]>=0.1.80",
+  "acp-sdk",
+  "openai",
+  "python-dotenv",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+]
+
+[tool.uv]
+package = false

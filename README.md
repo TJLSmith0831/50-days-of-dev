@@ -31,8 +31,8 @@ See [AGENTS.md](AGENTS.md) for repo conventions/commands. Each day's own README 
 | 8 | 7/19 Sun | MCP basics | Docs MCP — minimal MCP server that exposes local project docs, proves a round-trip | TS | local | done |
 | 9 | 7/20 Mon | MCP caching | Cached Weather MCP — ttlMs caching, cache-hit vs cache-miss latency | TS | hosted API (weather) | in progress |
 | 10 | 7/21 Tue | Subagent orchestration | Subagent MCP — bounded advisor/researcher/critiquer subagents on local Ollama, critiquer writes token-efficiency notes to AGENTS.md/CLAUDE.md | Py | local | done |
-| 11 | 7/22 Wed | Audit logging | Audited Agent — every tool call logged to an audit trail, print it after a run | Py | local | planned |
-| 12 | 7/23 Thu | Guardrails | Guarded Agent — regex + LLM guardrail blocks a bad input, show blocked vs allowed | Py | local | planned |
+| 11 | 7/22 Wed | Audit logging | Audited Agent — every tool call logged to an audit trail, print it after a run | Py | local | done |
+| 12 | 7/23 Thu | ACP | ACP Agent — 3 real BeeAI agents (researcher/writer/critic) chained over ACP's REST protocol, CLI discovers & displays live agent-to-agent output | Py | hosted (OpenAI) | done |
 | 13 | 7/24 Fri | A2A handoff | Handoff Demo — agent A hands a task to agent B via A2A-style handoff | Py/TS | local | planned |
 | 14 | 7/25 Sat | Ship-it | Ship Day — take Week 2's strongest build to portfolio-grade (see Ship DoD); target picked at week's end | — | — | planned |
 | 15 | 7/26 Sun | Context engineering | Context Rebuild — raw prompt vs structured context, same task, compare output | Py | local | planned |
