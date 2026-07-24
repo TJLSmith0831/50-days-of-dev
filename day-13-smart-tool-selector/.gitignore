@@ -1,0 +1,2 @@
+# Local tool stores — seeded on first run, mutated by every benchmark run.
+data/

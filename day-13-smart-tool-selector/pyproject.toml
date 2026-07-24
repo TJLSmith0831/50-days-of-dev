@@ -1,0 +1,22 @@
+[project]
+name = "day-13-smart-tool-selector"
+version = "0.0.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "openai-agents",
+  # semantic-router's `[local]`/`[fastembed]` extras are gated to python<3.13 in
+  # its metadata, so on this repo's 3.13 they resolve to nothing. Depend on the
+  # local encoder backend directly instead.
+  "semantic-router",
+  "fastembed",
+  "ddgs",
+  "python-dotenv",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+]
+
+[tool.uv]
+package = false
