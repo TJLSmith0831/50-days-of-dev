@@ -9,6 +9,7 @@ dist/
 .faiss_index/
 .faiss_index_cache_meta.pkl
 *.db
+chroma_db/
 uv.lock
 .vscode/
 .windsurf/

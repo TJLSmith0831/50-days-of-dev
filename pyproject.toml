@@ -5,7 +5,7 @@ requires-python = ">=3.13"
 
 [tool.uv.workspace]
 members = ["day-*"]
-exclude = ["day-07-armadillo-cli", "day-08-docs-mcp", "day-09-cached-weather-mcp"]
+exclude = ["day-07-armadillo-cli", "day-08-docs-mcp", "day-09-cached-weather-mcp", "day-14-toolsieve"]
 
 [tool.uv]
 package = false
