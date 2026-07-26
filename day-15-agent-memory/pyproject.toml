@@ -1,0 +1,12 @@
+[project]
+name = "day-15-agent-memory"
+version = "0.0.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "mem0ai",
+  "chromadb",
+  "ollama",
+]
+
+[tool.uv]
+package = false
