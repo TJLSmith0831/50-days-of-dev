@@ -1,0 +1,5 @@
+relations:
+  decided_by: governed by a decision record
+  supersedes: replaces an earlier decision
+  caused_by: motivated by an incident
+  depends_on: relies on another component

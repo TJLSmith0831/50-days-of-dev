@@ -1,0 +1,15 @@
+[project]
+name = "day-16-typed-graph-vault"
+version = "0.0.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "ollama",
+  "pydantic",
+  "pyyaml",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
