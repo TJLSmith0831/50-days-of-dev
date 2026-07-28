@@ -19,6 +19,17 @@ def stub(monkeypatch):
     return corpus
 
 
+def test_pinned_ids_win_over_the_selection_rule(monkeypatch):
+    """Once pinned, the query set is frozen — the rule must not re-resolve it.
+
+    This is the whole point of pinning: a corpus whose qrels shift must not
+    quietly change which 10 queries the experiment reports on.
+    """
+    monkeypatch.setattr(dataset, "PINNED_QUERY_IDS", ("7", "2"))
+    corpus = Corpus(docs=DOCS, queries={"1": "q"}, qrels={"1": {"d3": 1}})
+    assert dataset.select_query_ids(corpus, count=10) == ["7", "2"]
+
+
 def test_top_k_above_depth_is_rejected(stub):
     # Otherwise the report claims a top-20 cut over a 5-candidate set and the
     # two lanes stop being comparable.
@@ -51,7 +62,6 @@ def test_a_pinned_id_outside_the_query_set_is_named(monkeypatch, capsys):
     monkeypatch.setattr(main, "load_scifact", lambda: corpus)
     monkeypatch.setattr(main, "DenseIndex", StubIndex)
     monkeypatch.setattr(main, "Reranker", StubReranker)
-    monkeypatch.setattr(main, "PINNED_QUERY_IDS", ("999", "1"))
     monkeypatch.setattr(dataset, "PINNED_QUERY_IDS", ("999", "1"))
 
     with pytest.raises(SystemExit, match="999"):

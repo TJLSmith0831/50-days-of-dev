@@ -14,8 +14,8 @@ import sys
 
 import numpy as np
 
-from src import report
-from src.dataset import PINNED_QUERY_IDS, load_scifact, select_query_ids
+from src import dataset, report
+from src.dataset import load_scifact, select_query_ids
 from src.lanes import BI_ENCODER, CROSS_ENCODER, DenseIndex, Reranker, Timings, top_k
 from src.metrics import first_gold_rank, ndcg_at_k, recall_at_k, summarize
 
@@ -64,9 +64,11 @@ def self_check() -> None:
         assert len(line) <= report.WIDTH
     _check("render", f"worst-case row stays inside {report.WIDTH} columns")
 
-    if PINNED_QUERY_IDS:
-        assert len(set(PINNED_QUERY_IDS)) == len(PINNED_QUERY_IDS) == 10
-        _check("pinned", "10 distinct query ids pinned")
+    pinned = dataset.PINNED_QUERY_IDS
+    if pinned:
+        assert len(set(pinned)) == len(pinned) == 10
+        assert list(pinned) == sorted(pinned, key=dataset._sort_key), "pin in selection order"
+        _check("pinned", "10 distinct query ids pinned, in selection order")
     else:
         _check("pinned", "no ids pinned yet — selection rule resolves them at run time")
 
@@ -83,7 +85,7 @@ def run(top_n: int, depth: int) -> None:
     say("loading BEIR SciFact (first run downloads the dataset and ~150 MB of weights)...")
     corpus = load_scifact()
     query_ids = select_query_ids(corpus, count=10)
-    if not PINNED_QUERY_IDS:
+    if not dataset.PINNED_QUERY_IDS:
         say(f"resolved query ids (pin these in src/dataset.py): {query_ids}")
     if not query_ids:
         raise SystemExit(

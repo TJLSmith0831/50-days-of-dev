@@ -17,7 +17,8 @@ QRELS_SPLIT = "test"
 
 # Pinned after the first live run so the experiment stops depending on the
 # selection rule below. Empty means "resolve from qrels and print the result".
-PINNED_QUERY_IDS: tuple[str, ...] = ()
+# These are exactly what `select_query_ids` resolved on 2026-07-28.
+PINNED_QUERY_IDS: tuple[str, ...] = ("1", "3", "5", "13", "36", "42", "48", "49", "50", "51")
 
 
 @dataclass(frozen=True)
