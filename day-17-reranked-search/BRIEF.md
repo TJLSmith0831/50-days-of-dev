@@ -153,7 +153,7 @@ Pick the variant that matches what actually ran. **Do not post the other one.**
 ## Checks before recording / handoff
 
 1. `uv run main.py --self-check` ends with `self-check OK`.
-2. `uv run --group dev pytest -q` — 29 passed.
+2. `uv run --group dev pytest -q` — 40 passed.
 3. A full `uv run main.py` has completed at least once, so `.cache/corpus.npz` exists and the recorded run is fast.
 4. `PINNED_QUERY_IDS` in `src/dataset.py` is filled with the 10 resolved ids.
 5. Every `___` in this file is replaced with a real measured number.

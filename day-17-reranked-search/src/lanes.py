@@ -6,6 +6,7 @@ cannot be broken by an onnxruntime import problem on a machine with no weights.
 
 from __future__ import annotations
 
+import hashlib
 import math
 import os
 import statistics
@@ -135,8 +136,15 @@ class Reranker:
 
 
 def _cache_signature(doc_ids: Sequence[str]) -> str:
-    """Weights and corpus both invalidate the cache; identity of the ids is the guard."""
-    return f"{BI_ENCODER}|{len(doc_ids)}|{doc_ids[0] if doc_ids else ''}|{doc_ids[-1] if doc_ids else ''}"
+    """Weights and corpus both invalidate the cache; identity of the ids is the guard.
+
+    Every id is hashed, not just a sample. Row i of the cached matrix is only
+    meaningful next to `doc_ids[i]`, so a corpus that kept its length but changed
+    its order would otherwise reuse silently misaligned vectors — which produces
+    plausible-looking nonsense rather than an error.
+    """
+    digest = hashlib.sha256("\n".join(doc_ids).encode()).hexdigest()[:16]
+    return f"{BI_ENCODER}|{len(doc_ids)}|{digest}"
 
 
 def _load_cache(cache_path: Path, doc_ids: Sequence[str]) -> np.ndarray | None:

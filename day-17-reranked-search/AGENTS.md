@@ -9,7 +9,7 @@ Python · fastembed (local ONNX, no API key) · `BAAI/bge-small-en-v1.5` bi-enco
 ## Commands (verified 2026-07-28)
 
 - `uv run main.py --self-check` — offline metric/ranking/render checks. Verified.
-- `uv run --group dev pytest -q` — 27 unit tests. Verified.
+- `uv run --group dev pytest -q` — 40 unit tests. Verified.
 - `uv run main.py` — the live two-lane report. **Not yet run**; needs HuggingFace reachable.
 
 ## Concept
@@ -22,6 +22,8 @@ A reranker reorders a candidate set; it cannot retrieve. The dense lane's `recal
 - **The baseline is a plain bi-encoder.** fastembed does not auto-apply bge's optional query-instruction prefix — `query_embed` falls through to `embed` for `OnnxTextEmbedding`. That is the right baseline (the prefix is a ~1-point effect and would muddy what the before/after measures), but it is a choice, not an oversight.
 - **The 10 queries are picked by a rule fixed before any scores are seen** — first 10 by id with a positive judgment. Do not re-pick them after seeing a disappointing delta; probe with `--depth` or `DAY17_RERANKER` instead.
 - **Ties must break by document id.** ONNX CPU inference is deterministic, but equal cosine scores otherwise reorder run-to-run and make the table jitter. `top_k` sorts on `(-score, doc_id)` and a test pins it.
+- **The corpus cache hashes every document id, not a sample of them.** Row `i` of `.cache/corpus.npz` is only meaningful beside `doc_ids[i]`. A corpus that kept its length but changed its order would otherwise pass a first/last-id check and return silently misaligned vectors — confident nonsense rather than an error. `tests/test_cache.py` pins the reordering case.
+- **The cross-encoder loads before the corpus embed.** Constructed the other way round, a missing or unreachable reranker failed only after the ~40s embed, which the user then had to sit through again.
 - **`src/lanes.py` imports fastembed inside its functions**, not at module top, so `--self-check` stays instant and cannot be broken by an onnxruntime import problem on a machine with no weights.
 - **First live run downloads ~150 MB** from `huggingface.co` (+ `cdn-lfs.huggingface.co`). fastembed's GCS mirror at `storage.googleapis.com/qdrant-fastembed` carries the bi-encoder but **no cross-encoder**, so there is no HF-free path for this day. Corpus vectors cache to `.cache/corpus.npz`, keyed by model name and corpus size.
 - **Deliberately not built:** an LLM-as-reranker third lane. That is Day 23's topic, it costs 500 local generations per run, and it would make this day about judging rather than reranking.

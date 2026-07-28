@@ -74,17 +74,36 @@ def self_check() -> None:
 
 
 def run(top_n: int, depth: int) -> None:
+    if top_n > depth:
+        raise SystemExit(
+            f"--top-k {top_n} exceeds --depth {depth}: the reranker only ever sees "
+            f"{depth} candidates, so a top-{top_n} cut would compare unequal lanes."
+        )
+
     say("loading BEIR SciFact (first run downloads the dataset and ~150 MB of weights)...")
     corpus = load_scifact()
     query_ids = select_query_ids(corpus, count=10)
     if not PINNED_QUERY_IDS:
         say(f"resolved query ids (pin these in src/dataset.py): {query_ids}")
+    if not query_ids:
+        raise SystemExit(
+            f"no queries with a positive judgment in {len(corpus.qrels)} qrels rows — "
+            "the qrels split or column names in src/dataset.py are probably wrong"
+        )
+    missing = [query_id for query_id in query_ids if query_id not in corpus.queries]
+    if missing:
+        raise SystemExit(
+            f"query ids {missing} are not in the SciFact query set — "
+            "check PINNED_QUERY_IDS in src/dataset.py"
+        )
 
+    # Built before the corpus embed so a missing cross-encoder fails in seconds
+    # rather than after a ~40s embed the user then has to sit through again.
+    reranker = Reranker()
     index, embed_seconds, cached = DenseIndex.build(
         corpus.doc_ids, [doc.indexed_text for doc in corpus.docs]
     )
     text_by_id = {doc.doc_id: doc.indexed_text for doc in corpus.docs}
-    reranker = Reranker()
 
     query_embed = Timings("query embed")
     vector_search = Timings("vector search")
