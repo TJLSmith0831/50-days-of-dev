@@ -1,0 +1,14 @@
+[project]
+name = "day-18-workflow-rag"
+version = "0.0.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "llama-index-workflows",
+  "llama-index-llms-ollama",
+  "llama-index-embeddings-huggingface",
+  "llama-index-core",
+  "rich",
+]
+
+[tool.uv]
+package = false
