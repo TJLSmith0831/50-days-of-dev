@@ -1,0 +1,21 @@
+[project]
+name = "day-19-agentic-rag"
+version = "0.0.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "llama-index-workflows",
+  "llama-index-llms-ollama",
+  "llama-index-embeddings-huggingface",
+  "llama-index-core",
+  "rich",
+]
+
+[tool.uv]
+package = false
+
+# Without this, ruff's first-party detection depends on where it was invoked
+# from: run inside this directory it sorts `agentic_workflow` into a trailing
+# first-party block, run from the repo root it wants it alphabetically among
+# the third-party imports — and whichever you fix, the other one fails.
+[tool.ruff.lint.isort]
+known-first-party = ["agentic_workflow"]
