@@ -3,7 +3,7 @@ mod notch;
 use stackwatch::{
     available_agent_clis, kill_local_process, launch_session, new_terminals, resolve_permission_channel,
     scan_system_agents, start_universal_tailer, term, thousands, AgentEvent, AgentStatus, AgentType,
-    AppState, HudMode, NotchGeometry, PermissionChannels, PermissionRequest, PermissionResponse,
+    AppState, HudMode, NotchGeometry, DRAWER_HEIGHT, PermissionChannels, PermissionRequest, PermissionResponse,
     SessionLaunchPayload, SharedState, Terminals,
 };
 
@@ -82,6 +82,34 @@ async fn handle_post_ui(
         .map(str::to_string);
     *srv.ui_request.lock().unwrap() = Some((mode, session_id));
     (StatusCode::OK, Json(serde_json::json!({ "status": "ok" })))
+}
+
+/// `POST /session/input` — type into a session's terminal from outside the app.
+///
+/// The same bytes a keystroke would produce, straight into the PTY. Added so the demo
+/// shoot could drive the one beat that proves the pane is interactive without a human at
+/// the trackpad — the recording has to be re-runnable after a UI change, and a hand-typed
+/// take isn't. It is the write half of what `POST /ui` does for panes.
+async fn handle_session_input(
+    State(srv): State<ServerRouterState>,
+    Json(body): Json<serde_json::Value>,
+) -> impl IntoResponse {
+    let Some(session_id) = body.get("session_id").and_then(|s| s.as_str()) else {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({ "error": "session_id required" })),
+        );
+    };
+    let text = body.get("text").and_then(|t| t.as_str()).unwrap_or_default();
+    let mut terms = srv.terminals.lock().unwrap();
+    let Some(term) = terms.get_mut(session_id) else {
+        return (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({ "error": "no terminal for that session" })),
+        );
+    };
+    term.send(text.as_bytes());
+    (StatusCode::OK, Json(serde_json::json!({ "status": "sent" })))
 }
 
 async fn handle_get_index() -> Html<&'static str> {
@@ -175,6 +203,7 @@ fn start_http_server(
             .route("/permission/request", post(handle_permission_request))
             .route("/session/launch", post(handle_session_launch))
             .route("/ui", post(handle_post_ui))
+            .route("/session/input", post(handle_session_input))
             .layer(
                 CorsLayer::new()
                     .allow_origin(HeaderValue::from_static("*"))
@@ -279,6 +308,16 @@ fn with_alpha(color: Color32, alpha: f32) -> Color32 {
         (alpha.clamp(0.0, 1.0) * 255.0) as u8,
     )
 }
+
+/// Slack between the last painted row and the bottom of the drawer.
+///
+/// Not cosmetic — it decouples the two feedback loops. The window is sized from what the
+/// last frame painted, and what a frame paints depends on the room it has (`room_for`
+/// skips a section that won't fit). Sizing to the measurement exactly leaves the last
+/// section landing right on the boundary, so it paints, shrinks the window, doesn't fit,
+/// disappears, grows the window, paints again — a flicker at 30fps. The slack means a
+/// section that fit once still fits after the shrink.
+const DRAWER_SLACK: f32 = 16.0;
 
 // ---------------------------------------------------------------- terminal
 
@@ -533,6 +572,12 @@ struct NotchWatcherApp {
     geometry: NotchGeometry,
     mode: HudMode,
     docked_as: Option<HudMode>,
+    /// Last size actually sent to the viewport. The drawer's height depends on content,
+    /// so the mode alone no longer tells us whether a re-dock is needed.
+    docked_size: (f32, f32),
+    /// How tall the drawer's content measured last frame. `None` until it has been
+    /// painted once, which is what `DRAWER_HEIGHT` is still the fallback for.
+    measured_drawer_h: Option<f32>,
     /// Which session's terminal `HudMode::Terminal` is showing.
     terminal_session: Option<String>,
     /// Last grid the PTY was told about, so a resize only fires when it actually changed.
@@ -601,6 +646,8 @@ impl NotchWatcherApp {
             geometry,
             mode: HudMode::Collapsed,
             docked_as: None,
+            docked_size: (0.0, 0.0),
+            measured_drawer_h: None,
             terminal_session: None,
             term_grid: (term::TERM_ROWS, term::TERM_COLS),
             ui_request,
@@ -686,13 +733,34 @@ impl eframe::App for NotchWatcherApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         ctx.request_repaint_after(Duration::from_millis(33));
 
-        if self.docked_as != Some(self.mode) {
-            self.mode_since = Instant::now();
-            let (w, h) = self.geometry.hud_size(self.mode);
-            let (x, y) = self.geometry.dock_position(w);
-            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(vec2(w, h)));
+        let (mut want_w, mut want_h) = self.geometry.hud_size(self.mode);
+        if self.mode == HudMode::Drawer {
+            // Fit the drawer to its content rather than to a fixed 350pt sized for the
+            // worst case, which left a third of the panel as dead black space whenever
+            // fewer cards were showing.
+            //
+            // The height comes from what the painter actually advanced through last
+            // frame, not from a table of section heights kept in step with it by hand.
+            // That table is exactly what went wrong first: the estimate drifted from the
+            // real advances, `room_for` decided ACTIVITY wouldn't fit, and the section
+            // silently vanished. The painter is the only thing that knows how tall the
+            // painter is. One frame of lag, invisible at 30fps.
+            want_h = self.geometry.notch_height
+                + self.measured_drawer_h.unwrap_or(DRAWER_HEIGHT);
+        }
+        want_w = want_w.min(self.geometry.screen_width);
+        // Re-dock on any size change, not only a mode change — the drawer's height is now
+        // a function of state, so `docked_as` alone would freeze it at whatever the
+        // content happened to be when it opened.
+        if self.docked_as != Some(self.mode) || (want_w, want_h) != self.docked_size {
+            if self.docked_as != Some(self.mode) {
+                self.mode_since = Instant::now();
+            }
+            let (x, y) = self.geometry.dock_position(want_w);
+            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(vec2(want_w, want_h)));
             ctx.send_viewport_cmd(egui::ViewportCommand::OuterPosition(pos2(x, y)));
             self.docked_as = Some(self.mode);
+            self.docked_size = (want_w, want_h);
         }
 
         // Collect a folder the async picker resolved since the last frame.
@@ -1217,7 +1285,11 @@ impl eframe::App for NotchWatcherApp {
                     // variable (a wrapped failure reason can eat most of the drawer). Each
                     // one must claim its room before it paints, or it lands on top of the
                     // section before it — which is exactly what a fixed `y +=` used to do.
-                    let floor = card.bottom() - 6.0;
+                    // Gate against the drawer's *maximum* height, not the current window.
+                    // The window is now sized to last frame's content, so gating on it
+                    // would mean a section could never grow back once it had been skipped
+                    // once — the window would already have shrunk to exclude it.
+                    let floor = card.top() + notch_h + DRAWER_HEIGHT;
                     let room_for = |y: f32, needed: f32| y + needed <= floor;
 
                     // 4. Local Agents — agent CLIs running anywhere on this machine.
@@ -1324,7 +1396,11 @@ impl eframe::App for NotchWatcherApp {
                         // left rather than a fixed 40pt. The constant left a dead black
                         // band under the list whenever the sections above it were short,
                         // and clipped the list whenever they weren't.
-                        let activity_h = (floor - y).max(24.0);
+                        // Bounded by the sessions actually listed, not by the space left:
+                        // stretching to the floor is what re-created the dead band this
+                        // was meant to remove, just inside a scroll area instead of below
+                        // it. Four rows then it scrolls.
+                        let activity_h = (20.0 * s.sessions.len().min(4) as f32).max(24.0);
                         ui.allocate_ui_at_rect(
                             egui::Rect::from_min_size(pos2(x, y), vec2(wrap, activity_h)),
                             |ui| {
@@ -1369,7 +1445,12 @@ impl eframe::App for NotchWatcherApp {
                                     });
                             },
                         );
+                        y += activity_h;
                     }
+
+                    // What the window should be next frame. Measured, not estimated —
+                    // see the docking block.
+                    self.measured_drawer_h = Some(y - card.top() - notch_h + DRAWER_SLACK);
                 }
 
                 // ---- terminal content

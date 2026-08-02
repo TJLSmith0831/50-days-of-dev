@@ -66,10 +66,26 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
-# Ad-hoc signature. Unsigned bundles are killed on launch by Gatekeeper on Apple silicon;
-# this is enough for a locally-built app (it is not notarised and won't run elsewhere).
-echo "==> ad-hoc signing"
-codesign --force --deep --sign - "$APP"
+# Strip extended attributes first. Finder/iCloud leave `com.apple.provenance` and friends
+# on copied files, and codesign refuses to sign a bundle carrying them:
+# "resource fork, Finder information, or similar detritus not allowed".
+xattr -cr "$APP"
+
+# Signing identity. Ad-hoc (`-`) works, but its cdhash changes on every build — and macOS
+# keys TCC permissions (Screen Recording, Desktop/Documents access) to that hash. So an
+# ad-hoc app has to be re-approved after *every* rebuild.
+#
+# Set CODESIGN_ID to a stable self-signed identity and the grants persist:
+#   Keychain Access → Certificate Assistant → Create a Certificate…
+#     name: StackWatch Dev · type: Code Signing · self-signed
+#   CODESIGN_ID="StackWatch Dev" ./package.sh
+CODESIGN_ID="${CODESIGN_ID:--}"
+if [[ "$CODESIGN_ID" == "-" ]]; then
+  echo "==> ad-hoc signing (permissions reset on each rebuild — see CODESIGN_ID above)"
+else
+  echo "==> signing as '$CODESIGN_ID'"
+fi
+codesign --force --deep --sign "$CODESIGN_ID" "$APP"
 
 if [[ "${1:-}" == "--no-install" ]]; then
   echo "==> built $APP (not installed)"
