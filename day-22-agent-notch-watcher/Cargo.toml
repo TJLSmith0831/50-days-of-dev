@@ -1,0 +1,41 @@
+[package]
+name = "agent-notch-watcher"
+version = "0.1.0"
+edition = "2021"
+description = "macOS Notch-integrated HUD for tracking AI agent activity, session limits, and brand logos."
+
+[[bin]]
+name = "agent-notch-watcher"
+path = "src/main.rs"
+
+[[bin]]
+name = "simulate"
+path = "src/simulate.rs"
+
+[dependencies]
+tokio = { version = "1.38", features = ["full"] }
+axum = "0.7"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+eframe = "0.29"
+egui = "0.29"
+sysinfo = "0.30"
+reqwest = { version = "0.12", features = ["json"] }
+tower-http = { version = "0.5", features = ["cors"] }
+
+# Pinned to the versions winit 0.30 already pulls in, so this adds no extra compile.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.5.2"
+objc2-foundation = "0.2.2"
+objc2-app-kit = { version = "0.2.2", features = [
+    "NSApplication",
+    "NSRunningApplication",
+    "NSResponder",
+    "NSScreen",
+    "NSView",
+    "NSWindow",
+] }
+raw-window-handle = "0.6"
+
+[dev-dependencies]
+tokio-test = "0.4"
