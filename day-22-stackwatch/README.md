@@ -103,12 +103,18 @@ cargo test
 cargo run --bin stackwatch
 ```
 
-Install it properly as `StackWatch.app` in `/Applications` (put a square PNG at
-`assets/icon.png` first if you want a custom icon):
+Install it properly as `StackWatch.app` in `/Applications`:
 
 ```bash
-./package.sh
+CODESIGN_ID="StackWatch Dev" ./package.sh
 ```
+
+`CODESIGN_ID` matters more than it looks. macOS keys TCC permissions to a bundle's
+designated requirement, and for an ad-hoc signature that requirement is the cdhash — a
+hash of the code — so every rebuild is a new app as far as the system is concerned and
+every permission has to be granted again. With a stable identity the requirement becomes
+bundle id plus certificate, and grants survive rebuilds. `package.sh` documents how to
+create the self-signed identity; it does not need to be trusted.
 
 It starts **empty** — "No agent / Not running", no token gauge. That's intended, not a bug: the
 HUD reports what's actually running, and on a cold start nothing is. Sessions appear two ways.

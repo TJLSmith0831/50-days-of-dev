@@ -9,7 +9,11 @@ Rust · `eframe`/`egui` (painter-only UI) · `objc2`/AppKit (window level + notc
 ## Commands (verified 2026-08-02)
 - Test: `cargo test` (42: 38 lib + 4 bin — the egui/AppKit paint pass itself is verified by running)
 - Run App: `cargo run --bin stackwatch`
-- Package + install: `./package.sh` → `/Applications/StackWatch.app` (`--no-install` for `dist/` only)
+- Package + install: `CODESIGN_ID="StackWatch Dev" ./package.sh` → `/Applications/StackWatch.app`
+  (`--no-install` builds into `dist/` only). **Always pass `CODESIGN_ID`** — without it the
+  bundle is ad-hoc signed, its designated requirement is a cdhash, and macOS re-prompts for
+  Screen Recording and folder access after every single rebuild. See the comment in
+  `package.sh` for the identity and how to recreate it.
 - Run Simulator: `cargo run --bin simulate`
 - Terminal check: `cargo run --bin check_term` (spawns `top` + real `claude` in a PTY, exit 0/1)
 - Folder-picker regression check: `cargo run --bin check_picker` (unattended, ~9s, exit 0/1/2)

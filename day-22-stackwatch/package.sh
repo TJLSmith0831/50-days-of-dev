@@ -71,13 +71,37 @@ PLIST
 # "resource fork, Finder information, or similar detritus not allowed".
 xattr -cr "$APP"
 
-# Signing identity. Ad-hoc (`-`) works, but its cdhash changes on every build — and macOS
-# keys TCC permissions (Screen Recording, Desktop/Documents access) to that hash. So an
-# ad-hoc app has to be re-approved after *every* rebuild.
+# Signing identity, and why this matters more than it looks.
 #
-# Set CODESIGN_ID to a stable self-signed identity and the grants persist:
-#   Keychain Access → Certificate Assistant → Create a Certificate…
-#     name: StackWatch Dev · type: Code Signing · self-signed
+# macOS keys TCC permissions (Screen Recording, Desktop/Documents access) to a bundle's
+# *designated requirement*. Signed ad-hoc (`-`), that requirement is the cdhash:
+#
+#     designated => cdhash H"b56bec66..."
+#
+# which is a hash of the code — so every rebuild is a different app as far as TCC is
+# concerned, and every grant has to be given again. Signed with a real identity it becomes
+#
+#     designated => identifier "com.tjlsmith.stackwatch" and certificate leaf = H"7d90a4fb..."
+#
+# — bundle id plus certificate, neither of which changes when the code does. Verified:
+# rebuilt with a changed version string and the folder-access grant survived.
+#
+# `StackWatch Dev` is a self-signed cert in the login keychain. It does not need to be
+# *trusted* — codesign signs happily with an untrusted self-signed identity, and nothing
+# here is distributed, so no Gatekeeper check ever evaluates it. To recreate it:
+#
+#   openssl req -x509 -newkey rsa:2048 -keyout k.pem -out c.pem -days 3650 -nodes \
+#     -subj "/CN=StackWatch Dev" -addext "basicConstraints=critical,CA:false" \
+#     -addext "keyUsage=critical,digitalSignature" \
+#     -addext "extendedKeyUsage=critical,codeSigning"
+#   openssl pkcs12 -export -inkey k.pem -in c.pem -out sw.p12 -name "StackWatch Dev" -passout pass:PICK_ONE
+#   security import sw.p12 -k ~/Library/Keychains/login.keychain-db -P PICK_ONE -T /usr/bin/codesign
+#   rm -f k.pem sw.p12     # the private key belongs in the keychain, not on disk
+#
+# (`-T /usr/bin/codesign`, not `-A`: only codesign may use the key unprompted.)
+# Note macOS ships LibreSSL, whose `openssl req` lacks `-addext` — use a config file with
+# an `x509_extensions` section instead, or Homebrew's openssl.
+#
 #   CODESIGN_ID="StackWatch Dev" ./package.sh
 CODESIGN_ID="${CODESIGN_ID:--}"
 if [[ "$CODESIGN_ID" == "-" ]]; then
