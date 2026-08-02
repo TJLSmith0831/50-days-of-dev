@@ -130,7 +130,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .json(&json!({
             "agent_command": "ollama",
             "working_directory": "/Users/tjlsmith0831/Desktop/Programming/50-days-of-dev",
-            "initial_prompt": "run llama3"
         }))
         .send()
         .await;

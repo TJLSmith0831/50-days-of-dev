@@ -1,7 +1,7 @@
 //! AppKit glue. Two jobs winit/eframe can't do for us:
 //! read the physical notch geometry, and get the window above the menu bar.
 
-use agent_notch_watcher::NotchGeometry;
+use stackwatch::NotchGeometry;
 
 #[cfg(target_os = "macos")]
 pub fn detect_geometry() -> NotchGeometry {
@@ -90,5 +90,30 @@ pub fn dock_window(cc: &eframe::CreationContext<'_>) {
     window.setMovable(false);
 }
 
+/// Bring the HUD's process to the front. Call before presenting any AppKit panel.
+///
+/// An `Accessory` app never activates on its own — clicking the HUD gives its window
+/// focus without making the *app* active. `NSOpenPanel` (what the folder picker is
+/// underneath) is presented as a sheet on the HUD window, and a sheet whose owning app
+/// is inactive is visible but dead: it can't become key, clicks land nowhere, the
+/// completion handler never fires, and macOS paints the spinning-wait cursor over a
+/// HUD that the sheet has made window-modal. Activating first makes the panel key.
+#[cfg(target_os = "macos")]
+pub fn activate_app() {
+    use objc2_app_kit::NSApplication;
+    use objc2_foundation::MainThreadMarker;
+
+    let Some(mtm) = MainThreadMarker::new() else {
+        return;
+    };
+    // ponytail: `activateIgnoringOtherApps` is soft-deprecated in favour of `activate()`
+    // on macOS 14+, but the replacement won't pull a background Accessory app forward.
+    #[allow(deprecated)]
+    NSApplication::sharedApplication(mtm).activateIgnoringOtherApps(true);
+}
+
 #[cfg(not(target_os = "macos"))]
 pub fn dock_window(_cc: &eframe::CreationContext<'_>) {}
+
+#[cfg(not(target_os = "macos"))]
+pub fn activate_app() {}

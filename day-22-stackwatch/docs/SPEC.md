@@ -1,6 +1,6 @@
 # Specification: Agent Notch Watcher (Day 22)
 
-- **Target**: Day 22 monorepo challenge (`day-22-agent-notch-watcher`)
+- **Target**: Day 22 monorepo challenge (`day-22-stackwatch`)
 - **Stack**: Rust (`eframe`/`egui` + AppKit/`objc2` + Axum + `sysinfo` + `notify-rust`)
 - **Design Paradigm**: Ponytail Minimal / High-Impact (Zero speculative trait abstractions; single generic JSONL tailer + standard HTTP IPC).
 
@@ -33,7 +33,7 @@ flowchart TD
         L3[".gemini/brain/*.jsonl"]
     end
 
-    subgraph Backend ["Rust Backend (day-22-agent-notch-watcher)"]
+    subgraph Backend ["Rust Backend (day-22-stackwatch)"]
         UJT["UniversalJsonlTailer (Background Task)"]
         AX["Axum HTTP Server (127.0.0.1:8765)"]
         NOTIF["macOS Native Notification & Sound Manager"]
