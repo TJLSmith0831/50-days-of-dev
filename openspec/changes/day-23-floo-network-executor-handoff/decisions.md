@@ -100,6 +100,11 @@ Full cross-cutting decision history: `openspec/explore/day-23-floo-network.md` (
 - **Why**: `codex` is not installed on this machine (the personal laptop), so its real event schema could not be checked the way Claude's was. Claiming it works would be a claim not run. It needs re-verifying on the work laptop before being relied on there.
 - **Source**: recommended-accepted
 
+## E17: Detection falls back to the login shell's PATH
+- **Decision**: `find_on_path` first searches the inherited `PATH`; if that misses, it resolves the login shell's PATH once (`$SHELL -lic 'printf %s "$PATH"'`, cached in a `OnceLock`) and searches that. E6's "no shell invocation" still holds for the common case — the shell only runs after a direct lookup has already failed.
+- **Why**: Found while verifying the packaged app. A GUI app launched from Finder, the Dock or Spotlight inherits launchd's minimal `PATH` (`/usr/bin:/bin:/usr/sbin:/sbin`), not the shell's — so `claude`, which lives under `~/.nvm/versions/node/<v>/bin` here, is invisible. Confirmed by running the detection test under that PATH: `claude on the inherited PATH: false`, and with the fallback it resolves to the real nvm binary. Without this, the installed app would silently sit in chat-only mode and report "no executor found on PATH" while the user's terminal finds `claude` fine — the single worst failure mode for this project, since the whole harness is an executor front-end. It only bit the installed build; launching from a terminal (as every earlier verification did) inherits the full PATH and hides the bug entirely.
+- **Source**: recommended-accepted
+
 ## Open items for this change (to grill)
 
 - Verify `parse_codex_line` against a real `codex` on the work laptop (per E16).
