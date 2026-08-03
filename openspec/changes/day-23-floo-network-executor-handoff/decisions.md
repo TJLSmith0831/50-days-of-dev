@@ -96,8 +96,14 @@ Full cross-cutting decision history: `openspec/explore/day-23-floo-network.md` (
 - **Source**: recommended-accepted
 
 ## E16: Codex's adapter is written but unverified
-- **Decision**: The Codex adapter and its event parser ship implemented and covered by the fake-executor stub, but have never run against a real `codex`. A `ponytail:` comment on `parse_codex_line` records this.
-- **Why**: `codex` is not installed on this machine (the personal laptop), so its real event schema could not be checked the way Claude's was. Claiming it works would be a claim not run. It needs re-verifying on the work laptop before being relied on there.
+- **Decision**: The Codex adapter and its event parser ship implemented and covered by the fake-executor stub, but have never been run against a real `codex`. A `ponytail:` comment on `parse_codex_line` records this.
+- **Why**: Claiming it works would be a claim not run — the event schema is written from Codex's documented `item.started`/`item.completed` shape, not from observed output, which is exactly how D11's Claude flag list ended up missing `--verbose`.
+- **AMENDED**: this entry originally said "`codex` is not installed on this machine", which was **false**. Codex CLI 0.146.0 is installed at `~/.nvm/versions/node/v24.16.0/bin/codex`; I asserted its absence without ever running `command -v codex`. The conclusion (adapter unverified) stands, but the reason does not: verifying it is now a cheap thing to do, not a blocked one. Found when the Codex integration test started spending 20s and intermittently failing — it guarded on `find_on_path("codex").is_none()` and, codex being present all along, was spawning the *real* binary.
+- **Source**: recommended-accepted
+
+## E18: The Codex adapter must use the detected binary path, not the name `codex`
+- **Decision**: `Session` carries the `bin` path detection resolved, and the per-turn Codex spawn uses it instead of `Command::new("codex")`.
+- **Why**: A real bug, surfaced by the flaky test above. Detection resolves a full path and the adapter threw it away, looking the name up again through whatever `PATH` the process happened to have — the same class of failure as E17, and it also made the adapter impossible to point at the fake-executor stub, so the test was spending real Codex invocations. The integration test now runs against the stub and asserts the actual event sequence (ToolCall → Text → Done, then idle) rather than merely that some event arrived.
 - **Source**: recommended-accepted
 
 ## E17: Detection falls back to the login shell's PATH

@@ -34,7 +34,7 @@
 - [x] 5.4 Implement pass-through wrapper: forward user input to the live executor, stream `ExecutorEvent`s back
 - [x] 5.5 Implement switch-back-to-spec-mode termination (no backgrounding)
 - [x] 5.6 Implement crash reaction: banner + `currentMode` revert to `spec` + preserved history, on `ExecutorEvent::Crashed`
-- [x] 5.7 `cargo test` unit tests: idle gating rejects mid-call switches, crash reaction updates `.meta.json` correctly
+- [ ] 5.7 `cargo test` unit tests: idle gating rejects mid-call switches, crash reaction updates `.meta.json` correctly — **partially done**: idle gating is covered at `executor::send` (`a_second_turn_is_rejected_while_the_first_is_in_flight`), but the crash reaction has no test because it lives in `AppSink::emit` and needs a Tauri `AppHandle`. Behaviour verified manually by killing a live executor; the missing coverage is item 1 of `day-23-floo-network/FOLLOW-UPS.md`.
 
 ## 6. OpenSpec change linking (/propose)
 

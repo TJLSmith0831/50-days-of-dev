@@ -19,7 +19,7 @@ no HTTP client, no API key handling.
 - [x] 2.4 Implement the query surface (`graphify query`/`path`/`explain` invocations and result display)
 - [x] 2.5 Implement report-summary injection: truncate `GRAPH_REPORT.md` to 4000 chars, append as a `role: "tool"` JSONL message with a pointer to the full results pane
 - [x] 2.6 Implement failure handling: non-zero exit surfaces stderr in the results pane, no message injected
-- [x] 2.7 `cargo test` unit tests: output-directory parsing, truncation boundary, failure path injects nothing
+- [x] 2.7 `cargo test` unit tests: output-directory parsing, truncation boundary, failure path injects nothing — note: the "target must stay inside the active project" guard is *not* covered, since it sits in the `run_graphify` Tauri command; item 2 of `day-23-floo-network/FOLLOW-UPS.md`
 
 ## 3. Verification
 
