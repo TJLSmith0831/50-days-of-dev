@@ -116,6 +116,16 @@ Full cross-cutting decision history: `openspec/explore/day-23-floo-network.md` (
 - **Why**: Task 5.7 asked for exactly this test and I had marked the task complete without one — the logic sat inside `AppSink::emit`, which needs a Tauri `AppHandle` and so could not be exercised from `cargo test` at all. Extracting it is the smaller shape anyway: the sink becomes a two-line wrapper, and the test guards the path production actually runs instead of a re-implementation of it. The test also pins the part that is easy to regress silently — that history survives, since append-only storage is the only reason a crash is safe to recover from at all.
 - **Source**: recommended-accepted
 
+## E20: Codex's spawn and failure path, verified against the real CLI
+- **Decision**: `codex exec` is invoked with `--skip-git-repo-check` and `stdin` set to null, and `parse_codex_line` now handles `turn.failed`, top-level `error` events, and `item.completed` items of type `error`.
+- **Why**: E16 said the adapter was unverified; running the real Codex CLI 0.146.0 found three defects it was hiding, none of which the fake-executor stub could have caught because the stub only ever emitted the happy path I imagined.
+  - **`codex exec` refuses to run outside a git repository** ("Not inside a trusted directory and --skip-git-repo-check was not specified"). The harness registers projects by path and has never required them to be git repos, so on a non-git project *every* Codex turn failed at spawn.
+  - **`codex exec` reads stdin**, and the adapter left stdin inherited — a turn could block on a terminal that will never send anything.
+  - **A failing turn emits `turn.failed`, never `turn.completed`.** The parser recognised only the latter, so a failed turn produced no terminal event at all: `busy` stayed true forever, the composer stayed disabled, and the user was given no reason why. Errors also arrive as their own top-level `error` events and as `item.completed` items with `type: "error"` carrying `message` (not `text`), all of which were silently dropped.
+  The regression test is built from output captured from the real CLI rather than a fixture I wrote, since a fixture I invented could only ever prove the parser matches my guess — which is exactly how these three got in.
+- **Status**: the event *envelope*, the failure path, and the exact flag set are now verified against the real binary. The success-path item schemas (`agent_message`, `command_execution`, `file_change` field names) remain unverified, because this machine's Codex is not authenticated — the probe reached `thread.started`/`turn.started` and then failed on a 401.
+- **Source**: recommended-accepted
+
 ## Open items for this change (to grill)
 
 - Verify `parse_codex_line` against a real `codex` on the work laptop (per E16).
