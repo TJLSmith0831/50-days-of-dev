@@ -111,6 +111,11 @@ Full cross-cutting decision history: `openspec/explore/day-23-floo-network.md` (
 - **Why**: Found while verifying the packaged app. A GUI app launched from Finder, the Dock or Spotlight inherits launchd's minimal `PATH` (`/usr/bin:/bin:/usr/sbin:/sbin`), not the shell's — so `claude`, which lives under `~/.nvm/versions/node/<v>/bin` here, is invisible. Confirmed by running the detection test under that PATH: `claude on the inherited PATH: false`, and with the fallback it resolves to the real nvm binary. Without this, the installed app would silently sit in chat-only mode and report "no executor found on PATH" while the user's terminal finds `claude` fine — the single worst failure mode for this project, since the whole harness is an executor front-end. It only bit the installed build; launching from a terminal (as every earlier verification did) inherits the full PATH and hides the bug entirely.
 - **Source**: recommended-accepted
 
+## E19: The crash reaction lives in `executor::on_crash`, not in the Tauri sink
+- **Decision**: `on_crash(home, hash, thread_id)` owns reverting the thread to spec mode and clearing `executorSessionId`; `AppSink::emit` calls it. Covered by `a_crash_reverts_the_thread_and_clears_its_session`, written red-first.
+- **Why**: Task 5.7 asked for exactly this test and I had marked the task complete without one — the logic sat inside `AppSink::emit`, which needs a Tauri `AppHandle` and so could not be exercised from `cargo test` at all. Extracting it is the smaller shape anyway: the sink becomes a two-line wrapper, and the test guards the path production actually runs instead of a re-implementation of it. The test also pins the part that is easy to regress silently — that history survives, since append-only storage is the only reason a crash is safe to recover from at all.
+- **Source**: recommended-accepted
+
 ## Open items for this change (to grill)
 
 - Verify `parse_codex_line` against a real `codex` on the work laptop (per E16).
