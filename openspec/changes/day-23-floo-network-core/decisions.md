@@ -71,6 +71,11 @@ D-number here — amend it at the source if it turns out wrong.
 - **Why**: Found while implementing §2 — the torn-line recovery test showed that appending onto a file whose last line was truncated mid-write concatenated the new message onto the broken one, producing a single unparseable line and silently losing the *new* message too. C6 covers dropping a torn line on read; it does not cover the write path turning one lost message into two. Closing the line off first bounds the damage to the one message that was already lost.
 - **Source**: recommended-accepted
 
+## C11: Rename uses the note command bar, because `window.prompt` does nothing in Tauri
+- **Decision**: Project rename and thread rename open the same floating command bar that ⌘N uses, prefilled with the current name. The bar is now driven by one piece of state (`{ label, value, submit }`) with three callers — new note, rename project, rename thread — instead of a boolean plus two `prompt()` calls.
+- **Why**: Found by finally exercising the flows. Both Rename buttons were **dead**: `window.prompt` exists in Tauri's WKWebView but returns `null` immediately without ever showing a dialog, so `if (!name?.trim()) return;` swallowed every rename. Tasks 3.6 and 4.6 claimed these flows worked; the Rust commands were unit-tested and correct, but nothing in the UI could reach them. This is the failure mode unit tests can't see and a screenshot won't either — the button looks fine, it just does nothing. Reusing the command bar was also the smaller diff than adding a modal: one state field replaced a boolean, and the note flow got prefill support for free.
+- **Source**: recommended-accepted
+
 ## Open items for this change (to grill)
 
 (none)

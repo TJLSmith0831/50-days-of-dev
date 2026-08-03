@@ -19,7 +19,7 @@
 - [x] 3.3 Implement `add_project`, `list_projects` Tauri commands (per design.md's command surface)
 - [x] 3.4 Implement display-name rename (updates `project.json` + global index, leaves hash unchanged)
 - [x] 3.5 `cargo test` unit tests: path→hash determinism, duplicate-add reuses existing entry, rename leaves identity unchanged (per D15 tier 1)
-- [x] 3.6 Frontend: project picker (add/switch/rename), wired to the commands above
+- [x] 3.6 Frontend: project picker (add/switch/rename), wired to the commands above — rename goes through the shared command bar, not `window.prompt`, which is a no-op in Tauri's WKWebView (C11)
 
 ## 4. Thread management
 
@@ -28,7 +28,7 @@
 - [x] 4.3 Implement thread rename (title + `updatedAt`)
 - [x] 4.4 Implement `create_thread`, `list_threads`, `append_message`, `read_thread` Tauri commands (per design.md's command surface), wiring session-storage (§2) underneath
 - [x] 4.5 `cargo test` unit tests: thread creation produces valid sidecar + empty log, listing reflects sidecars accurately
-- [x] 4.6 Frontend: thread list/switch/rename UI, chat pane rendering messages read via `read_thread` (no message generation in this change)
+- [x] 4.6 Frontend: thread list/switch/rename UI, chat pane rendering messages read via `read_thread` (no message generation in this change) — rename via the shared command bar per C11
 
 ## 5. Note-taking
 
