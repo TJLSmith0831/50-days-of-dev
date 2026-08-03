@@ -19,3 +19,4 @@ uv.lock
 .archive/
 .corpus_cache.json
 .cuad_cache.json
+graphify-out/

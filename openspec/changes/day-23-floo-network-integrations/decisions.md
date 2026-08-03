@@ -46,6 +46,21 @@ Full cross-cutting decision history: `openspec/explore/day-23-floo-network.md` (
 - **Why**: `graphify` is not installed on this machine and is not published under that name on pip or npm; the npm package of that name is an unrelated project, so installing it to "verify" would prove nothing and add a supply-chain risk. D8 already flagged the flag surface as not exhaustively verified. Claiming a live run works would be a claim not run — the honest position is that the code matches D8's documented shape and the disk-parsing/failure paths are covered by tests using stand-in processes.
 - **Source**: recommended-accepted
 
+## I7: `graph.json` renders as a force-directed graph with a filterable community legend
+- **Decision**: The results pane draws `graph.json` as a canvas force-directed layout (`d3-force`) with a communities sidebar — colour swatch, name, node count, per-community checkboxes and select-all — plus hover labels, drag-to-pan, scroll-to-zoom and double-click-to-fit. Node radius scales with degree; edges are tinted by their source community; a weak per-community centroid force makes the clusters legible. Filtering hides marks without re-running the layout, so surviving nodes never move under the reader.
+- **Why**: The `graphify-integration` spec already required "an explorable, filterable graph"; the first pass only rendered node/edge counts, which did not meet it. The user supplied Graphify's own screenshot as the target. `d3-force` is the one added dependency — a hand-rolled force simulation is exactly the kind of clever code that is unpleasant to debug later, and canvas (not SVG) is what keeps several hundred nodes smooth.
+- **Source**: user
+
+## I8: Communities beyond the eighth fold into a neutral "Other"
+- **Decision**: The eight documented categorical hues are assigned in fixed order to the eight largest communities; every remaining community renders in one neutral grey "Other" entry that still appears in the legend with its combined count. Colour follows the entity — the ranking is computed once over the whole graph, so filtering never repaints the survivors.
+- **Why**: A node-link graph is an all-pairs form (any two communities can land adjacent), and the validated palette only clears the colour-blind separation floor at four hues — running the validator over all eight all-pairs fails hard (worst pair ΔE 1.6 deutan). Eight is already generous; generating a ninth hue is never correct. Identity is therefore carried by the legend, the hover label and the filter, with colour as a grouping cue only. Raised with the user explicitly against the alternative of ~16 hues matching the reference screenshot more literally; they chose to keep 8 + Other, accepting that on a repo with many small directories a majority of nodes can render grey.
+- **Source**: user
+
+## I9: Verification used a real import-graph extractor, not fabricated data
+- **Decision**: The stand-in `graphify` used to verify the pane parses real `import`/`use`/`mod` statements out of this monorepo's actual source files, producing real nodes (files), real edges (imports) and real communities (directories). It is a scratchpad tool and is not committed.
+- **Why**: The first stand-in emitted synthetic data copied from Graphify's marketing screenshot (FastAPI community names), which made the pane look right while proving nothing about it. The user called this out. A verification fixture that invents its data can't tell you the renderer is correct — parsing the real repo showed genuine structure (`lib.rs` importing all three modules, `App.tsx` importing `EventView.tsx`) and is what the screenshots now show.
+- **Source**: user
+
 ## Open items for this change (to grill)
 
 - Verify `graphify_args` and the run/query flow against a real `graphify` install (per I6).
